@@ -53,5 +53,56 @@ namespace GPS.ApplicationManager.Web.Controllers
     }
 
     // TODO: Add your CRUD (Read, Update, Delete) methods here:
+    [HttpGet("[action]")]
+    public async Task<ActionResult<List<LoanApplication>>> GetApplications()
+    {
+        var applications = await GetApplicationsFromFileAsync();
+        return Ok(applications);
+    }
+
+    [HttpPut("[action]/{applicationNumber}")]
+    public async Task<IActionResult> UpdateApplication(string applicationNumber, [FromBody] LoanApplication updatedApplication)
+    {
+        if (string.IsNullOrWhiteSpace(applicationNumber) || updatedApplication == null)
+            return BadRequest("Invalid application data.");
+
+        // Ensure route id and body id match (or set it)
+        updatedApplication.ApplicationNumber = applicationNumber;
+
+        var applications = await GetApplicationsFromFileAsync();
+        var existingIndex = applications.FindIndex(a => a.ApplicationNumber == applicationNumber);
+
+        if (existingIndex < 0)
+            return NotFound($"Application '{applicationNumber}' not found.");
+
+        // Preserve DateApplied if you want to keep original submission time
+        updatedApplication.DateApplied = applications[existingIndex].DateApplied;
+
+        applications[existingIndex] = updatedApplication;
+
+        var json = JsonSerializer.Serialize(applications);
+        await System.IO.File.WriteAllTextAsync(_filePath, json);
+
+        return Ok(new { message = "Updated Successfully." });
+    }
+
+    [HttpDelete("[action]/{applicationNumber}")]
+    public async Task<IActionResult> DeleteApplication(string applicationNumber)
+    {
+        if (string.IsNullOrWhiteSpace(applicationNumber))
+            return BadRequest("Application number is required.");
+
+        var applications = await GetApplicationsFromFileAsync();
+        var removedCount = applications.RemoveAll(a => a.ApplicationNumber == applicationNumber);
+
+        if (removedCount == 0)
+            return NotFound($"Application '{applicationNumber}' not found.");
+
+        var json = JsonSerializer.Serialize(applications);
+        await System.IO.File.WriteAllTextAsync(_filePath, json);
+
+        return Ok(new { message = "Deleted Successfully." });
+    } 
+
   }
 }
