@@ -44,13 +44,23 @@ namespace GPS.ApplicationManager.Web.Controllers
         return BadRequest("Invalid application data. All fields are required and must be valid.");
       }
 
-      loanApplication.DateApplied = DateTime.UtcNow;
       var applications = await GetApplicationsFromFileAsync();
+
+      // Enforce unique ApplicationNumber
+      if (applications.Exists(a => a.ApplicationNumber == loanApplication.ApplicationNumber))
+      {
+          return Conflict($"Application number '{loanApplication.ApplicationNumber}' already exists.");
+      }
+
+      loanApplication.DateApplied = DateTime.UtcNow;
+
       applications.Add(loanApplication);
+
       var json = JsonSerializer.Serialize(applications);
       await System.IO.File.WriteAllTextAsync(_filePath, json);
+
       return Ok(new { message = "Created Successfully." });
-    }
+  }
 
     // TODO: Add your CRUD (Read, Update, Delete) methods here:
     [HttpGet("[action]")]

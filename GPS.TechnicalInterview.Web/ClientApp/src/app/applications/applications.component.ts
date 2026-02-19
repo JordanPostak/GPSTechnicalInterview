@@ -8,7 +8,13 @@ import { LoanApplication } from "../models/loan-application.model";
   styleUrls: ["./applications.component.scss"],
 })
 export class ApplicationsComponent implements OnInit {
-  public displayedColumns: Array<string> = ["applicationNumber", "amount", "dateApplied", "status"];
+  public displayedColumns: Array<string> = [
+  "applicationNumber",
+  "amount",
+  "dateApplied",
+  "status",
+  "actions"
+];
 
   public applications: LoanApplication[] = [];
   public isLoading = false;
@@ -33,6 +39,22 @@ export class ApplicationsComponent implements OnInit {
         console.error(err);
         this.error = "Failed to load applications.";
         this.isLoading = false;
+      },
+    });
+  }
+
+  onDelete(app: LoanApplication): void {
+    if (!confirm(`Delete application ${app.applicationNumber}?`)) {
+      return;
+    }
+
+    this.api.deleteApplication(app.applicationNumber).subscribe({
+      next: () => {
+        this.loadApplications(); // refresh list
+      },
+      error: (err) => {
+        console.error(err);
+        alert("Failed to delete application.");
       },
     });
   }
