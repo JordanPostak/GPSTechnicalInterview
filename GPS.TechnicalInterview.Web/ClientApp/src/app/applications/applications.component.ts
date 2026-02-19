@@ -59,6 +59,18 @@ export class ApplicationsComponent implements OnInit {
     });
   }
 
+  getStatusLabel(status: number): string {
+    switch (status) {
+      case 1:
+        return "Approved";
+      case 2:
+        return "Funded";
+      case 0:
+      default:
+        return "New";
+    }
+  }
+
   // helper for table column: "amount"
   getAmount(app: LoanApplication): number {
     return app?.loanTerms?.amount ?? 0;

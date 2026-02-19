@@ -136,3 +136,15 @@ Implement and verify delete functionality from the Angular UI, and enforce data 
 - Delete operations remove only a single matching record.
 -  application numbers are prevented at the API layer.
 - Full Create, Read, and Delete functionality is now working end-to-end.The application now supports full end-to-end creation of loan applications through the Angular UI, with proper validation and error handling.
+
+# Day 1 — UI Polish (Status + Date Formatting)
+
+## Objective
+Improve dashboard readability and better match the Figma design.
+
+## Actions Taken
+- Converted numeric status values (0/1/2) into user-friendly labels (New/Approved/Funded) in the Angular UI.
+- Updated the Date Applied column to display date-only formatting to match the Figma mockup.
+
+## Result
+Dashboard table now matches the intended design more closely and is easier to read.
