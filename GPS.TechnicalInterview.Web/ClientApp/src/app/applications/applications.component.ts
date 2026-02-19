@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ApiService } from "../api.service";
 import { LoanApplication } from "../models/loan-application.model";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-applications",
@@ -20,7 +21,7 @@ export class ApplicationsComponent implements OnInit {
   public isLoading = false;
   public error: string | null = null;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadApplications();
@@ -58,6 +59,13 @@ export class ApplicationsComponent implements OnInit {
       },
     });
   }
+  
+  onEdit(app: LoanApplication): void {
+    this.router.navigate(["/create-application"], {
+      queryParams: { id: app.applicationNumber },
+    });
+  }
+
 
   getStatusLabel(status: number): string {
     switch (status) {

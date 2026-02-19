@@ -148,3 +148,20 @@ Improve dashboard readability and better match the Figma design.
 
 ## Result
 Dashboard table now matches the intended design more closely and is easier to read.
+
+# Day 2 — Edit / Update Functionality
+
+## Objective
+Implement full update functionality from dashboard UI to backend API.
+
+## Actions Taken
+- Added edit navigation from Applications table via query parameter.
+- Implemented edit mode detection in CreateApplicationComponent.
+- Prefilled reactive form using existing application data.
+- Disabled ApplicationNumber field during edit to preserve identifier integrity.
+- Implemented PUT call to UpdateApplication endpoint.
+- Preserved original DateApplied value on backend update.
+- Verified updates persist to loanApplication.json and reflect immediately in dashboard.
+
+## Result
+The application now supports full CRUD (Create, Read, Update, Delete) functionality end-to-end with Angular frontend and ASP.NET Core backend.

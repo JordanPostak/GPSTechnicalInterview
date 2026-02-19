@@ -18,10 +18,15 @@ export class ApiService {
   }
 
   updateApplication(applicationNumber: string, app: LoanApplication): Observable<{ message: string }> {
-    return this.http.put<{ message: string }>(`${this.baseUrl}/UpdateApplication/${encodeURIComponent(applicationNumber)}`, app);
+    return this.http.put<{ message: string }>(
+      `${this.baseUrl}/UpdateApplication/${encodeURIComponent(applicationNumber)}`,
+      app
+    );
   }
 
   deleteApplication(applicationNumber: string): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.baseUrl}/DeleteApplication/${encodeURIComponent(applicationNumber)}`);
+    return this.http.delete<{ message: string }>(
+      `${this.baseUrl}/DeleteApplication/${encodeURIComponent(applicationNumber)}`
+    );
   }
 }
