@@ -66,7 +66,7 @@ namespace GPS.ApplicationManager.Web.Controllers
         if (string.IsNullOrWhiteSpace(applicationNumber) || updatedApplication == null)
             return BadRequest("Invalid application data.");
 
-        // Ensure route id and body id match (or set it)
+        // Keep route as source of truth for the identifier
         updatedApplication.ApplicationNumber = applicationNumber;
 
         var applications = await GetApplicationsFromFileAsync();
@@ -75,7 +75,7 @@ namespace GPS.ApplicationManager.Web.Controllers
         if (existingIndex < 0)
             return NotFound($"Application '{applicationNumber}' not found.");
 
-        // Preserve DateApplied if you want to keep original submission time
+      // Preserve original application date
         updatedApplication.DateApplied = applications[existingIndex].DateApplied;
 
         applications[existingIndex] = updatedApplication;
