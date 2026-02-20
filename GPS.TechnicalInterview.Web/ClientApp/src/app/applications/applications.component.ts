@@ -2,6 +2,8 @@ import { Component, OnInit } from "@angular/core";
 import { ApiService } from "../api.service";
 import { LoanApplication } from "../models/loan-application.model";
 import { Router } from "@angular/router";
+import { MatDialog } from "@angular/material/dialog";
+import { ConfirmDialogComponent } from "../shared/confirm-dialog/confirm-dialog.component";
 
 @Component({
   selector: "app-applications",
@@ -21,7 +23,7 @@ export class ApplicationsComponent implements OnInit {
   public isLoading = false;
   public error: string | null = null;
 
-  constructor(private api: ApiService, private router: Router) {}
+  constructor(private api: ApiService, private router: Router, private dialog: MatDialog) {}
 
   ngOnInit(): void {
     this.loadApplications();
@@ -45,20 +47,31 @@ export class ApplicationsComponent implements OnInit {
   }
 
   onDelete(app: LoanApplication): void {
-    if (!confirm(`Delete application ${app.applicationNumber}?`)) {
-      return;
-    }
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: "520px",
+    });
 
-    this.api.deleteApplication(app.applicationNumber).subscribe({
-      next: () => {
-        this.loadApplications(); // refresh list
-      },
-      error: (err) => {
-        console.error(err);
-        alert("Failed to delete application.");
-      },
+    // ✅ Set data manually (this matches your dialog component)
+    dialogRef.componentInstance.data = {
+      title: "Delete Application",
+      message: "Are you sure you want to delete this application?",
+      cancelText: "CANCEL",
+      confirmText: "CONFIRM",
+    };
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      this.api.deleteApplication(app.applicationNumber).subscribe({
+        next: () => this.loadApplications(),
+        error: (err) => {
+          console.error(err);
+          alert("Failed to delete application.");
+        },
+      });
     });
   }
+
   
   onEdit(app: LoanApplication): void {
     this.router.navigate(["/create-application"], {
