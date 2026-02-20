@@ -53,6 +53,8 @@ The project includes an ASP.NET Core backend with an embedded Angular frontend. 
 - How HTTPS development certificates work in ASP.NET Core.
 - The importance of running Git commands from the repository root.
 
+---
+
 # Day 1 — Backend Implementation
 
 ## Objective
@@ -72,6 +74,8 @@ Implement and verify CRUD functionality for loan applications.
 ## Result
 
 The backend now supports creating and retrieving loan applications, completing the "Create" and "Read" portions of CRUD functionality.
+
+---
 
 # Day 1 — Frontend Integration
 
@@ -94,6 +98,8 @@ Connect Angular frontend to backend API and render application data in the dashb
 
 Confirmed full-stack functionality: backend data is retrieved and displayed correctly in the Angular dashboard.
 
+---
+
 # Day 1 — Create Application Integration
 
 ## Objective
@@ -112,6 +118,8 @@ Implement full Create functionality from Angular form to backend API.
 ## Result
 
 The application now supports full end-to-end creation of loan applications through the Angular UI, with proper validation and error handling.
+
+---
 
 # Day 1 — Delete Functionality & Data Integrity Improvements
 
@@ -137,6 +145,8 @@ Implement and verify delete functionality from the Angular UI, and enforce data 
 -  application numbers are prevented at the API layer.
 - Full Create, Read, and Delete functionality is now working end-to-end.The application now supports full end-to-end creation of loan applications through the Angular UI, with proper validation and error handling.
 
+---
+
 # Day 1 — UI Polish (Status + Date Formatting)
 
 ## Objective
@@ -148,6 +158,8 @@ Improve dashboard readability and better match the Figma design.
 
 ## Result
 Dashboard table now matches the intended design more closely and is easier to read.
+
+---
 
 # Day 2 — Edit / Update Functionality
 
@@ -165,3 +177,92 @@ Implement full update functionality from dashboard UI to backend API.
 
 ## Result
 The application now supports full CRUD (Create, Read, Update, Delete) functionality end-to-end with Angular frontend and ASP.NET Core backend.
+
+---
+
+# Day 2 — UI Enhancements
+
+## Objective
+
+Improve user experience by replacing basic browser interactions with a more polished UI consistent with the provided Figma design.
+
+## Actions Taken
+
+- Replaced default browser confirm() dialog with a custom Angular Material dialog component.
+- Created a reusable ConfirmDialogComponent for confirmation workflows.
+- Integrated MatDialog service into ApplicationsComponent.
+- Passed dialog data dynamically (title, message, button labels).
+- Connected dialog confirmation to backend Delete API.
+- Ensured UI behavior matches Figma design (modal layout, actions, positioning).
+- Improved overall UX by providing a cleaner and more professional interaction.
+
+## Result
+
+Delete actions now use a styled modal dialog consistent with the application design, improving usability and aligning closely with the Figma prototype.
+
+---
+
+# Day 2 — UI Enhancements & Final Features
+
+## Objective
+
+Enhance user experience and complete remaining frontend functionality, including edit, delete confirmation, and search.
+
+## Actions Taken
+
+- Implemented Edit functionality:
+  - Added navigation from Applications table to Create Application page with query parameters.
+  - Preloaded existing application data into the form when editing.
+  - Reused Create form for both create and update operations.
+  - Connected update flow to backend PUT endpoint.
+
+- Implemented Delete confirmation dialog:
+  - Replaced browser confirm() with Angular Material dialog.
+  - Created reusable ConfirmDialogComponent.
+  - Styled dialog to match Figma design (title, message, cancel/confirm buttons).
+  - Integrated dialog into ApplicationsComponent delete flow.
+
+- Improved data handling:
+  - Enforced unique Application Numbers during creation to prevent unintended bulk deletes.
+  - Added input sanitation and validation for numeric fields (amount, terms, monthly payment).
+  - Handled backend validation errors and displayed meaningful feedback in UI.
+
+- Improved data display:
+  - Converted numeric status values (0, 1, 2) into user-friendly labels (New, Approved, Funded).
+  - Formatted Date Applied to display only the date (matching Figma design).
+  - Ensured currency formatting for loan amounts.
+
+- Implemented search functionality:
+  - Added real-time search input to Applications dashboard.
+  - Used MatTableDataSource with custom filterPredicate.
+  - Enabled filtering across multiple fields:
+    - Application Number
+    - Name (First + Last)
+    - Email
+    - Phone Number
+    - Status
+    - Loan Amount
+    - Date Applied
+
+- Resolved Angular template parsing issues:
+  - Fixed invalid TypeScript casting in template using $any().
+  - Cleaned up data binding errors after switching to MatTableDataSource.
+
+## Result
+
+The application now supports full CRUD functionality with a polished user interface:
+
+- Create, Read, Update, Delete operations fully functional
+- Confirmation dialog for deletes (aligned with design)
+- Real-time search across application data
+- Clean and user-friendly data presentation
+
+The application closely matches the provided Figma design and demonstrates full-stack integration between Angular and ASP.NET Core.
+
+## What I Learned
+
+- How to reuse Angular forms for both create and update workflows
+- How Angular Material dialogs work and how to build reusable components
+- How to implement client-side table filtering using MatTableDataSource
+- The importance of aligning frontend models with backend validation requirements
+- How to debug Angular template parsing errors effectively
