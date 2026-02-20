@@ -3,6 +3,7 @@ import { ApiService } from "../api.service";
 import { LoanApplication } from "../models/loan-application.model";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
+import { MatTableDataSource } from "@angular/material/table";
 import { ConfirmDialogComponent } from "../shared/confirm-dialog/confirm-dialog.component";
 
 @Component({
@@ -12,20 +13,57 @@ import { ConfirmDialogComponent } from "../shared/confirm-dialog/confirm-dialog.
 })
 export class ApplicationsComponent implements OnInit {
   public displayedColumns: Array<string> = [
-  "applicationNumber",
-  "amount",
-  "dateApplied",
-  "status",
-  "actions"
-];
+    "applicationNumber",
+    "amount",
+    "dateApplied",
+    "status",
+    "actions",
+  ];
 
-  public applications: LoanApplication[] = [];
+  public dataSource = new MatTableDataSource<LoanApplication>([]);
   public isLoading = false;
   public error: string | null = null;
+
+  public searchTerm = "";
 
   constructor(private api: ApiService, private router: Router, private dialog: MatDialog) {}
 
   ngOnInit(): void {
+    // Custom search logic
+    this.dataSource.filterPredicate = (app: LoanApplication, filter: string) => {
+      const f = (filter ?? "").trim().toLowerCase();
+      if (!f) return true;
+
+      const statusLabel = this.getStatusLabel(app.status).toLowerCase();
+
+      const amountStr = String(app?.loanTerms?.amount ?? "").toLowerCase();
+      const appNum = String(app?.applicationNumber ?? "").toLowerCase();
+
+      const first = String(app?.personalInformation?.name?.first ?? "").toLowerCase();
+      const last = String(app?.personalInformation?.name?.last ?? "").toLowerCase();
+      const fullName = `${first} ${last}`.trim();
+
+      const phone = String(app?.personalInformation?.phoneNumber ?? "").toLowerCase();
+      const email = String(app?.personalInformation?.email ?? "").toLowerCase();
+
+      // Optional: date search
+      const dateStr = app?.dateApplied ? new Date(app.dateApplied).toLocaleDateString().toLowerCase() : "";
+
+      const haystack = [
+        appNum,
+        amountStr,
+        statusLabel,
+        first,
+        last,
+        fullName,
+        phone,
+        email,
+        dateStr,
+      ].join(" ");
+
+      return haystack.includes(f);
+    };
+
     this.loadApplications();
   }
 
@@ -35,8 +73,9 @@ export class ApplicationsComponent implements OnInit {
 
     this.api.getApplications().subscribe({
       next: (apps) => {
-        this.applications = apps ?? [];
+        this.dataSource.data = apps ?? [];
         this.isLoading = false;
+        this.applySearch(this.searchTerm);
       },
       error: (err) => {
         console.error(err);
@@ -46,12 +85,18 @@ export class ApplicationsComponent implements OnInit {
     });
   }
 
-  onDelete(app: LoanApplication): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: "520px",
-    });
+  applySearch(value: string): void {
+    this.searchTerm = value ?? "";
+    this.dataSource.filter = (this.searchTerm || "").trim().toLowerCase();
+  }
 
-    // ✅ Set data manually (this matches your dialog component)
+  clearSearch(): void {
+    this.applySearch("");
+  }
+
+  onDelete(app: LoanApplication): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, { width: "520px" });
+
     dialogRef.componentInstance.data = {
       title: "Delete Application",
       message: "Are you sure you want to delete this application?",
@@ -72,13 +117,11 @@ export class ApplicationsComponent implements OnInit {
     });
   }
 
-  
   onEdit(app: LoanApplication): void {
     this.router.navigate(["/create-application"], {
       queryParams: { id: app.applicationNumber },
     });
   }
-
 
   getStatusLabel(status: number): string {
     switch (status) {
@@ -90,11 +133,6 @@ export class ApplicationsComponent implements OnInit {
       default:
         return "New";
     }
-  }
-
-  // helper for table column: "amount"
-  getAmount(app: LoanApplication): number {
-    return app?.loanTerms?.amount ?? 0;
   }
 }
 
