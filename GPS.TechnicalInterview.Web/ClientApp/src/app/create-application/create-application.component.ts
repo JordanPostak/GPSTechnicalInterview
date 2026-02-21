@@ -11,12 +11,16 @@ import { LoanApplication } from "../models/loan-application.model";
 })
 export class CreateApplicationComponent {
   public applicationForm: FormGroup;
+
+  // UI-friendly status labels (backend stores these as numbers/enums)
   public statuses: Array<string> = ["New", "Approved", "Funded"];
 
+  // Simple UI state flags for loading/saving + showing errors
   public isSaving = false;
   public isLoading = false;
   public error: string | null = null;
 
+  // Same form is used for both Create and Edit (edit mode is triggered by query param)
   public isEditMode = false;
   private editingId: string | null = null;
 
@@ -26,6 +30,7 @@ export class CreateApplicationComponent {
     private router: Router,
     private route: ActivatedRoute
   ) {
+    // Reactive form so we can validate and build the payload for the backend cleanly
     this.applicationForm = this.formBuilder.group({
       firstName: [null, Validators.required],
       lastName: [null, Validators.required],
@@ -38,7 +43,8 @@ export class CreateApplicationComponent {
       terms: [null, Validators.required],
     });
 
-    // Edit mode: /create-application?id=A-1001
+    // Edit mode example: /create-application?id=1234
+    // If "id" exists, load existing data and lock the identifier.
     this.route.queryParams.subscribe((params) => {
       const id = params["id"];
       if (id) {
@@ -48,11 +54,14 @@ export class CreateApplicationComponent {
       } else {
         this.isEditMode = false;
         this.editingId = null;
+
+        // In create mode, allow user to enter application number
         this.applicationForm.get("applicationNumber")?.enable();
       }
     });
   }
 
+  // Convert UI status string into backend enum number
   private statusToNumber(status: string): number {
     switch (status) {
       case "Approved":
@@ -65,6 +74,7 @@ export class CreateApplicationComponent {
     }
   }
 
+  // Convert backend enum number into UI-friendly string
   private statusNumberToString(status: number): string {
     switch (status) {
       case 1:
@@ -77,12 +87,14 @@ export class CreateApplicationComponent {
     }
   }
 
+  // Clean money inputs so users can type "$10,000" and it still works
   private toMoneyNumber(value: any): number {
-    // Allows inputs like "10000", "10,000", "$10,000.50"
     const cleaned = String(value ?? "").replace(/[^0-9.]/g, "");
     return Number(cleaned);
   }
 
+  // Load existing application data for edit mode
+  // (This uses GetApplications since the backend doesn't have GetById)
   private loadForEdit(applicationNumber: string): void {
     this.error = null;
     this.isLoading = true;
@@ -97,6 +109,7 @@ export class CreateApplicationComponent {
           return;
         }
 
+        // Fill the form with existing values (edit experience)
         this.applicationForm.patchValue({
           firstName: app.personalInformation?.name?.first ?? "",
           lastName: app.personalInformation?.name?.last ?? "",
@@ -109,7 +122,7 @@ export class CreateApplicationComponent {
           terms: app.loanTerms?.terms ?? null,
         });
 
-        // Prevent changing primary identifier during edit
+        // Prevent changing primary identifier during edit (keeps updates safe)
         this.applicationForm.get("applicationNumber")?.disable();
 
         this.isLoading = false;
@@ -125,16 +138,17 @@ export class CreateApplicationComponent {
   onSave(): void {
     this.error = null;
 
+    // Frontend validation first, so we don't spam the API with bad requests
     if (this.applicationForm.invalid) {
       this.applicationForm.markAllAsTouched();
       this.error = "Please fill out all required fields.";
       return;
     }
 
-    // IMPORTANT: includes disabled applicationNumber in edit mode
+    // IMPORTANT: getRawValue() includes disabled fields (applicationNumber is disabled in edit mode)
     const v = this.applicationForm.getRawValue();
 
-    // Parse + validate numeric fields
+    // These conversions prevent ASP.NET model-binding errors (400s) from strings vs numbers
     const terms = parseInt(String(v.terms ?? "").trim(), 10);
     if (!Number.isFinite(terms) || terms <= 0) {
       this.error = "Terms must be a whole number greater than 0.";
@@ -153,10 +167,14 @@ export class CreateApplicationComponent {
       return;
     }
 
+    // Build payload to match the backend LoanApplication model shape
     const payload: LoanApplication = {
       applicationNumber: String(v.applicationNumber ?? "").trim(),
       status: this.statusToNumber(v.status),
-      dateApplied: new Date().toISOString(), // backend preserves original on update (your PUT does)
+
+      // Backend overwrites DateApplied on create; on update, backend keeps original
+      dateApplied: new Date().toISOString(),
+
       loanTerms: { amount, monthlyPayment, terms },
       personalInformation: {
         name: {
@@ -170,6 +188,7 @@ export class CreateApplicationComponent {
 
     this.isSaving = true;
 
+    // Use same button for create/update depending on mode
     const request$ =
       this.isEditMode && this.editingId
         ? this.api.updateApplication(this.editingId, payload)
@@ -184,6 +203,7 @@ export class CreateApplicationComponent {
         console.error(this.isEditMode ? "Update failed:" : "Create failed:", err);
         this.isSaving = false;
 
+        // Show useful errors (either a plain message or validation details)
         if (typeof err?.error === "string") {
           this.error = err.error;
         } else if (err?.error?.errors) {

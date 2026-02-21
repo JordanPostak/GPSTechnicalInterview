@@ -85,7 +85,7 @@ Connect Angular frontend to backend API and render application data in the dashb
 
 ## Actions Taken
 
-- Created TypeScript interfaces to match backend LoanApplication model.
+- Created TypeScript models to match the backend structure exactly (including nested objects), after running into issues where mismatched structure caused API errors.
 - Implemented ApiService methods to call backend CRUD endpoints.
 - Injected ApiService into ApplicationsComponent.
 - Loaded applications on ngOnInit().
@@ -133,17 +133,16 @@ Implement and verify delete functionality from the Angular UI, and enforce data 
 - Implemented a contextual menu (three-dot icon) using Angular Material mat-menu.
 - Added Delete action with confirmation dialog.
 - Connected Delete action to backend DELETE /ApplicationManager/DeleteApplication/{applicationNumber} endpoint.
-- Refactored backend Delete logic to remove a single matching record instead of using RemoveAll, preventing unintended multi-record deletion.
 - Identified duplicate application numbers issue during testing.
-- Enforced unique ApplicationNumber constraint in the Create endpoint.
+- Enforced unique ApplicationNumber constraint in the Create endpoint to prevent duplicates.
 - Added backend 409 Conflict response when attempting to create duplicate application numbers.
 
 ## Result
 
 - Applications can now be deleted directly from the dashboard.
-- Delete operations remove only a single matching record.
--  application numbers are prevented at the API layer.
-- Full Create, Read, and Delete functionality is now working end-to-end.The application now supports full end-to-end creation of loan applications through the Angular UI, with proper validation and error handling.
+- Application numbers are enforced as unique identifiers.
+- Delete operations behave correctly because duplicate records are no longer allowed.
+- Full Create, Read, and Delete functionality is now working end-to-end.
 
 ---
 
